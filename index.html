@@ -1,1 +1,164 @@
-<h1>메인페이지</h1>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>날씨 다이어리</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", "Apple SD Gothic Neo", sans-serif;
+      background: #fff9e0;
+      background-image: radial-gradient(#ffe680 1.5px, transparent 1.5px);
+      background-size: 22px 22px;
+      color: #6b5b2e;
+      min-height: 100vh;
+      padding: 30px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: #f2a900;
+      margin-bottom: 24px;
+      text-align: center;
+      text-shadow: 1px 1px 0 #fff3c0;
+    }
+    h1::before { content: "🌤️ "; }
+
+    form {
+      background: #fffdf5;
+      border: 3px solid #ffd84d;
+      border-radius: 24px;
+      padding: 20px;
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 8px 0 #ffe680, 0 10px 20px rgba(242, 169, 0, 0.15);
+    }
+
+    input, select {
+      font-size: 1rem;
+      padding: 12px 14px;
+      border: 2px solid #ffe08a;
+      border-radius: 14px;
+      background: #fffef9;
+      color: #6b5b2e;
+      outline: none;
+      transition: border-color 0.2s, transform 0.1s;
+    }
+    input:focus, select:focus {
+      border-color: #ffc107;
+      transform: scale(1.01);
+    }
+
+    button {
+      font-size: 1.05rem;
+      font-weight: 700;
+      padding: 13px;
+      border: none;
+      border-radius: 16px;
+      background: #ffc107;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #f2a900;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    button:hover { background: #ffcb2e; }
+    button:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #f2a900;
+    }
+
+    ul {
+      list-style: none;
+      width: 100%;
+      max-width: 440px;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    li {
+      background: #fffdf5;
+      border: 2px solid #ffe08a;
+      border-left: 8px solid #ffc107;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 0.98rem;
+      line-height: 1.5;
+      box-shadow: 0 3px 8px rgba(242, 169, 0, 0.1);
+      transition: transform 0.15s;
+    }
+    li:hover { transform: translateX(4px); }
+  </style>
+</head>
+<body>
+  <h1>날씨 다이어리</h1>
+
+  <form id="form">
+    <input type="date" id="date" required />
+    <select id="weather">
+      <option>☀️ 맑음</option>
+      <option>⛅ 구름</option>
+      <option>☁️ 흐림</option>
+      <option>🌧️ 비</option>
+      <option>❄️ 눈</option>
+    </select>
+    <select id="mood">
+      <option>😄 아주 좋음</option>
+      <option>🙂 좋음</option>
+      <option>😐 보통</option>
+      <option>😔 나쁨</option>
+      <option>😢 아주 나쁨</option>
+    </select>
+    <input type="text" id="note" placeholder="오늘 하루 총평" required />
+    <button type="submit">추가</button>
+  </form>
+
+  <ul id="list"></ul>
+
+  <script>
+    // 웹 앱 주소를 붙여 넣습니다
+    const URL = "https://script.google.com/macros/s/AKfycbxAvptzvac19My5x9KS9KYZxWjM9rxYxLmLuXnhnmQ3FRFHu2PMMRhASxpqv9O4G1G5/exec";
+
+    // 시트에서 다이어리 목록을 불러와 화면에 그립니다
+    async function load() {
+      const res = await fetch(URL);
+      const data = await res.json();
+      const list = document.getElementById("list");
+      list.innerHTML = "";
+      data.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent =
+          item.date + " · " + item.weather + " · " + item.mood + " · " + item.note;
+        list.appendChild(li);
+      });
+    }
+
+    // 추가 버튼을 누르면 시트에 한 줄 보내고, 다시 목록을 새로 그립니다
+    document.getElementById("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const date = document.getElementById("date").value;
+      const weather = document.getElementById("weather").value;
+      const mood = document.getElementById("mood").value;
+      const note = document.getElementById("note").value;
+      await fetch(URL, {
+        method: "POST",
+        body: JSON.stringify({ date, weather, mood, note }),
+      });
+      e.target.reset();
+      load();
+    });
+
+    // 페이지를 열면 곧바로 목록을 불러옵니다
+    load();
+  </script>
+</body>
+</html>
